@@ -26,6 +26,11 @@
 # That's it. When "g++" is invoked, colorgcc is run instead.
 # colorgcc looks at the program name to figure out which compiler to run.
 #
+# Alternatively, you can pass --colorgcc-compiler=<filename> as the very
+# first parameter to colorgcc to specify the full path to the compiler.
+# This is useful in more complicated build setups where symlinks aren't
+# an option and the compiler path may be determined programatically.
+#
 # The default settings can be overridden with ~/.colorgccrc.
 # See the comments in the sample .colorgccrc for more information.
 #
@@ -187,10 +192,18 @@ if (-f $configFile)
 }
 
 # Figure out which compiler to invoke based on our program name.
-$0 =~ m%.*/(.*)$%;
-$progName = $1 || $0;
+if (scalar(@ARGV) > 0 && $ARGV[0] =~ '--colorgcc-compiler=(.*)')
+{
+   $compiler = $1;
+   shift(@ARGV);
+}
+else
+{
+   $0 =~ m%.*/(.*)$%;
+   $progName = $1 || $0;
 
-$compiler = $compilerPaths{$progName} || $compilerPaths{"gcc"};
+   $compiler = $compilerPaths{$progName} || $compilerPaths{"gcc"};
+}
 
 # Get the terminal type. 
 $terminal = $ENV{"TERM"} || "dumb";
